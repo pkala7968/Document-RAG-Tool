@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+pytesseract
+pdfplumber
+pymupdf
+Pillow
+chromadb
+openai
+langchain
+python-dotenv
+python-multipart

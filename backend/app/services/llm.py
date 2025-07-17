@@ -1,12 +1,9 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.prompts import PromptTemplate
-from dotenv import load_dotenv
+from app.core.config import GOOGLE_API_KEY
 import google.generativeai as genai
-import os
 
-load_dotenv()
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 genai.configure(api_key=GOOGLE_API_KEY)
 
 def get_conversational_chain(retriever):

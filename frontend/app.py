@@ -1,51 +1,42 @@
 import os
 import streamlit as st
-from ocr import process_document
-from vectorstore import vectorstore_from_docs
-from llm import get_conversational_chain
-from langchain.text_splitter import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
+import requests
+
+FASTAPI_URL = "http://localhost:8000/query"  # Or your deployed URL
+
 
 load_dotenv()
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-st.title("Dicument RAG Tool")
-st.sidebar.title("Add you Documents")
-st.sidebar.subheader("Upload your PDFs to the app to start querying them.")
+st.title("Document RAG Tool")
+st.sidebar.title("Upload & Ask")
 
-docs= st.sidebar.file_uploader("Upload your Documents", type=["pdf","docx","txt","jpg/jpeg"], accept_multiple_files=True, key="pdf_uploader")
+docs = st.sidebar.file_uploader("Upload files", type=["pdf", "docx", "txt", "jpg", "jpeg"], accept_multiple_files=True)
+question = st.text_input("Ask a question based on the documents")
 
-process_docs= st.sidebar.button("Load docs")
+if st.button("Submit") and docs and question:
+    with st.spinner("Sending to backend..."):
+        files = [("files", (doc.name, doc, doc.type)) for doc in docs]
+        json_data = {"question": question}
 
-if process_docs and docs:
-    all_docs = []
+        try:
+            res = requests.post(FASTAPI_URL, files=files, data={"question": question})
+            if res.status_code == 200:
+                result = res.json()
 
-    for doc in docs:
-        with st.spinner(f"Processing {doc.name}..."):
-            langchain_docs = process_document(doc)
+                st.subheader("Answer:")
+                st.write(result["answer"])
 
-            # Split while preserving metadata
-            splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-            splits = splitter.split_documents(langchain_docs)
+                st.subheader("Sources:")
+                source_data = result.get("sources", [])
+                if source_data:
+                    st.table(source_data)
+                else:
+                    st.write("No sources found.")
+            else:
+                st.error(f"Backend error: {res.status_code} - {res.text}")
 
-            all_docs.extend(splits)
-
-    vectorstore = vectorstore_from_docs(all_docs)
-    retriever = vectorstore.as_retriever()
-    chain = get_conversational_chain(retriever)
-
-    st.session_state.chain = chain
-    st.success("Documents loaded and ready!")
-
-user_input = st.text_input("Ask a question about your documents:")
-
-if user_input:
-    with st.spinner("Generating answer..."):
-        response = st.session_state.chain({"question": user_input})
-        st.write(response["answer"])
-
-        # Show citations
-        st.markdown("**Sources:**")
-        for doc in response["source_documents"]:
-            st.markdown(f"- `{doc.metadata.get('source')}`, Page {doc.metadata.get('page')}")
+        except Exception as e:
+            st.error(f"Request failed: {e}")

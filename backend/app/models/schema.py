@@ -1,9 +1,6 @@
 from pydantic import BaseModel
 from typing import List
 
-class QueryRequest(BaseModel):
-    question: str
-
 class Source(BaseModel):
     file: str
     page: int

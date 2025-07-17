@@ -1,14 +1,7 @@
-import os
 import streamlit as st
-from dotenv import load_dotenv
 import requests
 
-FASTAPI_URL = "http://localhost:8000/query"  # Or your deployed URL
-
-
-load_dotenv()
-
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+FASTAPI_URL = "http://localhost:8000/query"  # Or deployed URL
 
 st.title("Document RAG Tool")
 st.sidebar.title("Upload & Ask")
@@ -17,7 +10,7 @@ docs = st.sidebar.file_uploader("Upload files", type=["pdf", "docx", "txt", "jpg
 question = st.text_input("Ask a question based on the documents")
 
 if st.button("Submit") and docs and question:
-    with st.spinner("Sending to backend..."):
+    with st.spinner("Processing..."):
         files = [("files", (doc.name, doc, doc.type)) for doc in docs]
         json_data = {"question": question}
 

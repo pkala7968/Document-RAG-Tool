@@ -34,9 +34,18 @@ async def query_docs(
     chain = get_conversational_chain(retriever)
 
     response = chain.invoke({"question": question})
-
+    
     # Build structured response
     source_list = []
+
+    if response["answer"].strip().lower() == "answer is not available in the context":
+        return QueryResponse(
+        doc_id="unknown",
+        question=question,
+        answer=response["answer"],
+        sources=source_list
+    )
+    
     for doc in response["source_documents"]:
         source_list.append(Source(file=doc.metadata["source"], page=doc.metadata.get("page", 1)))
 

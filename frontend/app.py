@@ -1,8 +1,8 @@
 import streamlit as st
 import requests
 
-UPLOAD_URL = "http://localhost:8000/upload"
-QUERY_URL = "http://localhost:8000/query"
+UPLOAD_URL = "https://backend-doc-rag.fly.dev/upload"
+QUERY_URL = "https://backend-doc-rag.fly.dev/query"
 
 # Session ID to track uploaded docs
 if "session_id" not in st.session_state:
@@ -16,45 +16,36 @@ docs = st.sidebar.file_uploader("Upload files", type=["pdf", "docx", "txt", "jpg
 
 question = st.text_input("Ask a question based on the uploaded documents")
 
-if st.button("Submit") and question:
-    with st.spinner("Processing..."):
-        try:
-            if docs and st.session_state.session_id is None:
-                # First time: upload files and ask question
-                files = [("files", (doc.name, doc, doc.type)) for doc in docs]
-                res = requests.post(UPLOAD_URL, files=files, data={"question": question})
-                if res.status_code == 200:
-                    result = res.json()
-                    st.session_state.session_id = result["doc_id"]
-                else:
-                    st.error(f"Upload failed: {res.status_code} - {res.text}")
-                    st.stop()
-
-            elif st.session_state.session_id:
-                # Follow-up question
-                res = requests.post(QUERY_URL, data={
-                    "question": question,
-                    "session_id": st.session_state.session_id
-                })
-                if res.status_code == 200:
-                    result = res.json()
-                else:
-                    st.error(f"Query failed: {res.status_code} - {res.text}")
-                    st.stop()
+if st.sidebar.button("Upload Documents"):
+    if docs:
+        with st.spinner("Uploading documents..."):
+            files = [("files", (doc.name, doc, doc.type)) for doc in docs]
+            res = requests.post(UPLOAD_URL, files=files)
+            if res.status_code == 200:
+                st.success("Documents uploaded and indexed!")
+                st.session_state.session_id = "shared"
             else:
-                st.warning("Please upload documents before asking a question.")
-                st.stop()
+                st.error(f"Upload failed: {res.status_code} - {res.text}")
+    else:
+        st.warning("Please upload at least one document.")
 
-            # Show answer and sources
-            st.subheader("Answer:")
-            st.write(result["answer"])
+if st.button("Submit"):
+    if question and st.session_state.get("session_id"):
+        with st.spinner("Processing..."):
+            res = requests.post(QUERY_URL, data={
+                "question": question
+            })
+            if res.status_code == 200:
+                result = res.json()
+                st.subheader("Answer:")
+                st.write(result["answer"])
 
-            st.subheader("Sources:")
-            sources = result.get("sources", [])
-            if sources:
-                st.table(sources)
+                st.subheader("Sources:")
+                if result["sources"]:
+                    st.table(result["sources"])
+                else:
+                    st.write("No sources found.")
             else:
-                st.write("No sources found.")
-
-        except Exception as e:
-            st.error(f"Something went wrong: {e}")
+                st.error(f"Query failed: {res.status_code} - {res.text}")
+    else:
+        st.warning("Please upload documents and enter a question.")

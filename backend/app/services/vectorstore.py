@@ -10,4 +10,4 @@ def vectorstore_from_docs(docs):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001",google_api_key=GOOGLE_API_KEY)
     vectorstore = FAISS.from_documents(docs, embeddings)
     vectorstore.save_local(str(DATA_PATH))
-    return vectorstore 
+    return vectorstore

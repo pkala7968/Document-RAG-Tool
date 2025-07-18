@@ -11,7 +11,7 @@ from app.services.embeddings import embeddings
 
 router = APIRouter()
 
-FAISS_INDEX_DIR = "faiss_index"  # single shared index
+FAISS_INDEX_DIR = "data/faiss_index"  # single shared index
 
 # Upload endpoint - handles document uploads and indexing
 @router.post("/upload")

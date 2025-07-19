@@ -29,6 +29,8 @@ A full-stack Document-based Question Answering (RAG) tool that allows users to u
 ![demopic1](demo/demopic1.png)
 ---
 ![demopic2](demo/demopic2.png)
+---
+You can also check out the demo video 👉[here](https://youtu.be/Mo8_ZxHoaCo)
 
 ---
 

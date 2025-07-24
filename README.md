@@ -30,6 +30,9 @@ A full-stack Document-based Question Answering (RAG) tool that allows users to u
 ---
 ![demopic2](demo/demopic2.png)
 ---
+>Newly added evaluation feature 👇
+![demopic3](demo/demopic3.png)
+---
 You can also check out the demo video 👉[here](https://youtu.be/Mo8_ZxHoaCo)
 
 ---

@@ -58,11 +58,11 @@ if "answer" in st.session_state and "sources" in st.session_state:
 
     if st.button("Evaluate Answer"):
         with st.spinner("Evaluating answer accuracy..."):
+            time.sleep(5)
             eval_payload = {
                 "answer": st.session_state.answer,
                 "sources": st.session_state.sources
             }
-            time.sleep(5)
             eval_res = requests.post("https://backend-doc-rag.fly.dev/evaluate", json=eval_payload)
             if eval_res.status_code == 200:
                 eval_data = eval_res.json()

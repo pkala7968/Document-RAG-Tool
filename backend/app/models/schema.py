@@ -10,3 +10,7 @@ class QueryResponse(BaseModel):
     question: str
     answer: str
     sources: List[Source]
+
+class EvaluateRequest(BaseModel):
+    answer: str
+    sources: List[Source]
